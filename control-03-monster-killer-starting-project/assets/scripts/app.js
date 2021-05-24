@@ -1,3 +1,4 @@
+
 const ATTACK_VALUE = 10;
 const STRONG_ATTACK_VALUE = 17;
 const MONSTER_ATTACK_VALUE = 14;
@@ -13,14 +14,30 @@ const LOG_EVENT_PLAYER_HEAL = 'PLAYER_HEALER';
 const LOG_EVENT_PLAYER_GAME_OVER = 'GAME_OVER';
 
 
-const enteredValue = prompt('Maximum life for you and the monster. ', '100');
-
-let chosenMaxLife = parseInt(enteredValue);
 let battleLog = [];
+let lastLoggedEntry;
 
-if ( isNaN(chosenMaxLife) || chosenMaxLife <= 0 ) {
-  chosenMaxLife = 100;
+function getMaxLifeValue() {
+  
+const enteredValue = prompt('Maximum life for you and the monster. ', '100');
+let parsedValue = parseInt(enteredValue);
+if ( isNaN(parsedValue) || parsedValue <= 0 ) {
+   throw {message: 'Invalid user input, not a number!'}
 } 
+  return parsedValue;
+}
+
+let chosenMaxLife;
+
+try {
+ chosenMaxLife = getMaxLifeValue();
+} catch (error) {
+  alert('You entered wrond data, default value 100 is used')
+  console.log(error);
+  chosenMaxLife = 100;
+
+}
+
 
 let currentMonsterHealth = chosenMaxLife;
 let currentPlayerHealth = chosenMaxLife;
@@ -35,41 +52,86 @@ function writeToLog(ev, val, monsterHealth, playerHealth) {
     finalMonsterHealth: monsterHealth,
     finalPlayerHealth: playerHealth,
   };
-  if (ev === LOG_EVENT_PLAYER_ATTACK) {
-    logEntry.target = 'MONSTER';
-  } else if (ev === LOG_EVENT_PLAYER_STRONG_ATTACK) {
-    logEntry = {
-      event: ev,
-      value: val,
-      target: 'MONSTER',
-      finalMonsterHealth: monsterHealth,
-      finalPlayerHealth: playerHealth,
-    };
-  } else if (ev === LOG_EVENT_MONSTER_ATTACK) {
-    logEntry = {
-      event: ev,
-      value: val,
-      target: 'PLAYER',
-      finalMonsterHealth: monsterHealth,
-      finalPlayerHealth: playerHealth,
-    };
-  } else if (ev === LOG_EVENT_PLAYER_HEAL) {
-    logEntry = {
-      event: ev,
-      value: val,
-      target: 'PLAYER',
-      finalMonsterHealth: monsterHealth,
-      finalPlayerHealth: playerHealth,
-    };
-  } else if (ev === LOG_EVENT_PLAYER_GAME_OVER) {
-    logEntry = {
-      event: ev,
-      value: val,
-      target: 'MONSTER',
-      finalMonsterHealth: monsterHealth,
-      finalPlayerHealth: playerHealth,
-    };
+
+  switch (ev) {
+    case LOG_EVENT_PLAYER_ATTACK:
+      logEntry.target = 'MONSTER';
+      break;
+    case LOG_EVENT_PLAYER_STRONG_ATTACK:
+      logEntry = {
+        event: ev,
+        value: val,
+        target: 'MONSTER',
+        finalMonsterHealth: monsterHealth,
+        finalPlayerHealth: playerHealth,
+      };
+      break;
+    case LOG_EVENT_MONSTER_ATTACK:
+      logEntry = {
+        event: ev,
+        value: val,
+        target: 'PLAYER',
+        finalMonsterHealth: monsterHealth,
+        finalPlayerHealth: playerHealth,
+      };
+      break;
+    case LOG_EVENT_PLAYER_HEAL:
+      logEntry = {
+        event: ev,
+        value: val,
+        target: 'PLAYER',
+        finalMonsterHealth: monsterHealth,
+        finalPlayerHealth: playerHealth,
+      };
+      break;
+    case LOG_EVENT_PLAYER_GAME_OVER:
+      logEntry = {
+        event: ev,
+        value: val,
+        target: 'MONSTER',
+        finalMonsterHealth: monsterHealth,
+        finalPlayerHealth: playerHealth,
+      };
+      break;
+      default: 
+      logEntry = {};
   }
+  // Code replace by switch statement
+  // if (ev === LOG_EVENT_PLAYER_ATTACK) {
+  //   logEntry.target = 'MONSTER';
+  // } else if (ev === LOG_EVENT_PLAYER_STRONG_ATTACK) {
+  //   logEntry = {
+  //     event: ev,
+  //     value: val,
+  //     target: 'MONSTER',
+  //     finalMonsterHealth: monsterHealth,
+  //     finalPlayerHealth: playerHealth,
+  //   };
+  // } else if (ev === LOG_EVENT_MONSTER_ATTACK) {
+  //   logEntry = {
+  //     event: ev,
+  //     value: val,
+  //     target: 'PLAYER',
+  //     finalMonsterHealth: monsterHealth,
+  //     finalPlayerHealth: playerHealth,
+  //   };
+  // } else if (ev === LOG_EVENT_PLAYER_HEAL) {
+  //   logEntry = {
+  //     event: ev,
+  //     value: val,
+  //     target: 'PLAYER',
+  //     finalMonsterHealth: monsterHealth,
+  //     finalPlayerHealth: playerHealth,
+  //   };
+  // } else if (ev === LOG_EVENT_PLAYER_GAME_OVER) {
+  //   logEntry = {
+  //     event: ev,
+  //     value: val,
+  //     target: 'MONSTER',
+  //     finalMonsterHealth: monsterHealth,
+  //     finalPlayerHealth: playerHealth,
+  //   };
+  // }
   battleLog.push(logEntry);
 }
 
@@ -173,14 +235,37 @@ function healPlayerHandler() {
 }
 
 
-function printLogHandler () {
-  console.log(battleLog);
+function printLogHandler() {
+  for (let i = 0; i < 3; i++) {
+console.log('----------------');
+  }
+  let j = 3;
+  do {
+    console.log('Outer', j);
+    for (let k = 0; k < 5; k++){
+      console.log('Inner', k);
+    }
+    j++;
+  } while (j < 3);
+
+  let i = 0;
+  for (const logEntry of battleLog) {
+    if ((!lastLoggedEntry && lastLoggedEntry !== 0) || lastLoggedEntry < i) {
+      console.log(`${i}`);
+      for (const key in logEntry) {
+        console.log(`${key} => ${logEntry[key]}`);
+      }
+      lastLoggedEntry = i;
+      break;
+    }
+    i++;
+  }
 }
-
-
 
 attackBtn.addEventListener('click', attackHandler);
 strongAttackBtn.addEventListener('click', strongAttackHandler);
 healBtn.addEventListener('click', healPlayerHandler);
 bonusLifeEl.addEventListener('click', removeBonusLife);
 logBtn.addEventListener('click', printLogHandler);
+
+
